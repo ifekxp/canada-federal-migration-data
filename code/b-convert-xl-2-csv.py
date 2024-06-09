@@ -7,12 +7,6 @@ import pandas as pd
 import os
 import re
 
-# Data classification:  
-#   Original: Unformatted source data
-#   Bronze: Formatted data suitable to feed to next stage
-#   Silver: Aggregated data from one or multi-stages 
-#   Gold: Presentable data
-
 # Location of data
 DATA_BASE_DIR = os.path.join(os.getcwd(), 'data')
 DATA_INPUT_DIR = os.path.join(DATA_BASE_DIR, 'original')
@@ -29,7 +23,7 @@ output_file_pattern = r'[^A-Za-z0-9.]+'
 # Get all files/folders from input folder
 input_files = os.scandir(DATA_INPUT_DIR)
 
-# Iterate each file 
+# Iterate each input file 
 for input_file in input_files: 
     if input_file.is_file() and input_file.name.endswith('.xlsx'):
         # Prepare the new CSV file name
@@ -94,7 +88,7 @@ for input_file in input_files:
 
         output_column_header.append('Country')
 
-        while i < input_column_len:
+        while i < ( input_column_len - 1):
             output_column_header.append(f'{year}-{month:02}')
 
             i = i + 1
@@ -106,6 +100,9 @@ for input_file in input_files:
                 year = year + 1
                 month = 1
                 i = i + 1                 
+
+        # Total column comes after end's year
+        output_column_header.append('Total')
 
         # Re-assign the column header
         dfi1.columns = output_column_header
