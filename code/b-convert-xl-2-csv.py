@@ -41,7 +41,7 @@ for input_file in input_files:
         dfi1.dropna(how='all', inplace = True)
 
         # Assign 0 to cell that doesn't have any value
-        dfi1.fillna(0, inplace = True)
+        dfi1.fillna('Missing', inplace = True)
 
         # Expand year's merged cell
         dfi1.ffill(axis=1, inplace=True)
@@ -68,7 +68,7 @@ for input_file in input_files:
                     continue
                 # Start of year
                 if v >= DATA_START_YEAR:
-                    DATA_START_YEAR = year
+                    DATA_START_YEAR = v
                     year_flag = True
                     break
             
@@ -111,7 +111,7 @@ for input_file in input_files:
         dfi1.drop('Total', axis=1, inplace=True)
         
         # Drop all rows that don't have actual data
-        dfi1.drop(dfi1[ dfi1['Country'] == 0 ].index, inplace=True)
+        dfi1.drop( dfi1[ dfi1['Country'].str.contains("Missing") ].index, inplace=True)
 
         # Drop row that begins with Total
         dfi1.drop( dfi1[ dfi1['Country'].str.contains("Total") ].index, inplace=True)
@@ -121,6 +121,6 @@ for input_file in input_files:
 
         # Drop row that begins with Data source
         dfi1.drop( dfi1[ dfi1['Country'].str.contains("Data") ].index, inplace=True)
-        
+
         # Save output to file
         dfi1.to_csv(output_file, index=False)
