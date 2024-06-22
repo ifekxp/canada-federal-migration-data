@@ -48,16 +48,16 @@ for input_file in input_files:
         
         row_count = len(dfi1.index)
 
-        row = 0
+        irow = 0
         i = 0
         month = 1
         year  = DATA_START_YEAR
         row_value = []
 
         # Find the start of year
-        while row < row_count:
+        while irow < row_count:
             # Get all values of a row to a list    
-            row_value = dfi1.iloc[row].values
+            row_value = dfi1.iloc[irow].values
 
             # Find the row where it has year value 
             year_flag = False
@@ -76,7 +76,7 @@ for input_file in input_files:
             if year_flag is True:
                 break
             # Otherwise continue
-            row = row + 1
+            irow = irow + 1
 
         # Prepare new column headers with Year-Month value
         output_column_header = []          
@@ -111,16 +111,35 @@ for input_file in input_files:
         dfi1.drop('Total', axis=1, inplace=True)
         
         # Drop all rows that don't have actual data
-        dfi1.drop( dfi1[ dfi1['Country'].str.contains("Missing") ].index, inplace=True)
+        dfi1.drop( dfi1[ dfi1['Country'].str.startswith("Missing") ].index, inplace=True)
 
-        # Drop row that begins with Total
-        dfi1.drop( dfi1[ dfi1['Country'].str.contains("Total") ].index, inplace=True)
+        # Drop row that has Total
+        dfi1.drop( dfi1[ dfi1['Country'].str.startswith("Total") ].index, inplace=True)
 
-        # Drop row that begins with Source countries
-        dfi1.drop( dfi1[ dfi1['Country'].str.contains("Source") ].index, inplace=True)
+        # Drop rows that contain no data (commment etc.)
+        dfi1.reset_index(drop=True, inplace=True)
 
-        # Drop row that begins with Data source
-        dfi1.drop( dfi1[ dfi1['Country'].str.contains("Data") ].index, inplace=True)
+        row_count = dfi1.shape[0]
+        col_count = dfi1.shape[1] - 1
+        
+        irow = 0
+        row_value = []
+        row_missing = []
+
+        # Find the start of year
+        while irow < row_count:
+            # Get all values of a row to a list    
+            row_value = dfi1.iloc[irow].values
+            lst_not_missing = list(filter(lambda x: x == 'Missing', row_value))
+            
+            if len(lst_not_missing) == col_count:
+                row_missing.append(irow)
+
+            irow = irow + 1
+
+        print(f'Dropping rows that are missing data: {row_missing}')
+        dfi1.drop(index=row_missing, inplace=True)            
+        
 
         # Save output to file
         dfi1.to_csv(output_file, index=False)
